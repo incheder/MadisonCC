@@ -1,13 +1,35 @@
 
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
-Parse.Cloud.define("hello", function(request, response) {
+/*Parse.Cloud.define("hello", function(request, response) {
   response.success("Hello world!");
-});
+});*/
 
 Parse.Cloud.afterSave("Review", function(request) {
+	query = new Parse.Query("HomeServiceRequest");
+	query.include("homeService");
+	query.get(request.object.get("homeServiceRequest").id, {
+		success: function(post) {
+			post.set("wasRated",true);
+		    post.save();
+		    console.log("REQUEST RATED");
+		    averageRatings(post.get("homeService"));
+		},
+		error: function(error) {
+		     console.error("Got an error saving average" + error.code + " : " + error.message);
+		}
+	});
+
+
+function averageRatings(homeServiceID){
+
+  innerQuery = new Parse.Query("HomeServiceRequest");
+  innerQuery.equalTo("homeService",homeServiceID);
+  innerQuery.equalTo("wasRated",true)
+
   query = new Parse.Query("Review");
-  query.equalTo("homeService",request.object.get("homeService"));
+  query.matchesQuery("homeServiceRequest",innerQuery);
+  //query.equalTo("homeService",homeServiceID);
   query.find({
     success: function(results) {
     	var average = 0;
@@ -17,17 +39,16 @@ Parse.Cloud.afterSave("Review", function(request) {
 
 	      	
 	    }
+	    //console.log(results);
 	    average = average / results.length;
-	    console.log(request.object.get("homeService").id);
-	    //alert(average);
-
+	   
 		query = new Parse.Query("HomeServices");
-		  query.get(request.object.get("homeService").id, {
+		  query.get(homeServiceID.id, {
 		    success: function(post) {
 		      post.set("stars",average);
 		      post.set("comments",results.length);
 		      post.save();
-		       console.error("SAVED");
+		       console.log("STATS SAVED");
 		    },
 		    error: function(error) {
 		      console.error("Got an error saving average" + error.code + " : " + error.message);
@@ -39,4 +60,7 @@ Parse.Cloud.afterSave("Review", function(request) {
       console.error("Got an error getting reviews" + error.code + " : " + error.message);
     }
   });
+
+}	
+  
 });
