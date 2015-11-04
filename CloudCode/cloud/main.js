@@ -11,6 +11,7 @@ Parse.Cloud.afterSave("Review", function(request) {
 	query.get(request.object.get("homeServiceRequest").id, {
 		success: function(post) {
 			post.set("wasRated",true);
+			post.set("rating",request.object.get("numStars"));
 		    post.save();
 		    console.log("REQUEST RATED");
 		    averageRatings(post.get("homeService"));
