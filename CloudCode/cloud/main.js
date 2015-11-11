@@ -5,6 +5,54 @@
   response.success("Hello world!");
 });*/
 
+Parse.Cloud.define("sendPushToClient", function(request, response) {
+  var query = new Parse.Query(Parse.Installation);
+  query.equalTo('channels', 'Client');
+  query.equalTo("user", request.params.client);
+  Parse.Push.send({
+  		where: query, // Set our Installation query
+  		data: {
+    		alert: "Confirmacion de servicio",
+    		date: request.params.date
+    		//homeServiceRequest: request.object.id
+  		}
+	}, {
+  		success: function() {
+    	// Push was successful
+    		console.log("Push was successful");
+  		},
+  		error: function(error) {
+    	// Handle error
+    	console.error("Push error: " + error.code + " : " + error.message);
+  		}
+	});
+});
+
+
+Parse.Cloud.afterSave("HomeServiceRequest", function(request) {
+	var query = new Parse.Query(Parse.Installation);
+	console.log(request.object.get("homeService"));
+	query.equalTo('homeService', request.object.get("homeService"));
+	//console.log("requestID: " + request.object.id);
+	Parse.Push.send({
+  		where: query, // Set our Installation query
+  		data: {
+    		alert: "Willie Hayes injured by own pop fly.",
+    		homeServiceRequest: request.object.id
+  		}
+	}, {
+  		success: function() {
+    	// Push was successful
+    		console.log("Push was successful");
+  		},
+  		error: function(error) {
+    	// Handle error
+    	console.error("Push error: " + error.code + " : " + error.message);
+  		}
+	});
+
+});
+
 Parse.Cloud.afterSave("Review", function(request) {
 	query = new Parse.Query("HomeServiceRequest");
 	query.include("homeService");
