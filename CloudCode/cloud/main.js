@@ -41,10 +41,21 @@ Parse.Cloud.define("sendPushToClient", function(request, response) {
 Parse.Cloud.afterSave("HomeServiceRequest", function(request) {
 
   if(request.object.get("status") == 0){
+        console.log("provider "+ request.object.get("serviceProvider"));
+        var providerQuery = new Parse.Query(Parse.User);
+        providerQuery.equalTo("objectId",request.object.get("serviceProvider") ); 
+
+
         var query = new Parse.Query(Parse.Installation);
-        //console.log(request.object.get("homeService"));
-        query.equalTo('homeService', request.object.get("homeService"));
+        //console.log("request "+ request);
+        //var mHomeService = Parse.Object.extend("HomeServices");
+        //var mHomeService = request.object.get("homeService").get("name");
+        //console.log("homeService "+mHomeService);
+        //console.log("service provider "+ mHomeService.object.get("serviceProvider"));
+
+        query.matchesQuery("user",providerQuery);
         //console.log("requestID: " + request.object.id);
+        
         Parse.Push.send({
             where: query, // Set our Installation query
             data: {
@@ -61,6 +72,7 @@ Parse.Cloud.afterSave("HomeServiceRequest", function(request) {
             console.error("Push error: " + error.code + " : " + error.message);
             }
         });
+
         }
 
 });
