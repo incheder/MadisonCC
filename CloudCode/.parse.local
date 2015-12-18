@@ -1,0 +1,10 @@
+{
+  "applications": {
+    "Madison": {
+      "applicationId": "xJzgkwGEHuFFIBazGyGWeHmbn9cSWaQ2F9oPHFhb"
+    },
+    "_default": {
+      "link": "Madison"
+    }
+  }
+}

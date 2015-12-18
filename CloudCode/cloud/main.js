@@ -8,7 +8,7 @@
 //actuakizar el estado del request una vez respondido
 Parse.Cloud.define("sendPushToClient", function(request, response) {
   var userQuery = new Parse.Query(Parse.User);
-  userQuery.equalTo("objectId",request.params.client );
+  userQuery.equalTo("objectId",request.params.client ); 
 
   var query = new Parse.Query(Parse.Installation);
   query.equalTo('channels', 'Client');
@@ -17,9 +17,11 @@ Parse.Cloud.define("sendPushToClient", function(request, response) {
   Parse.Push.send({
   		where: query, // Set our Installation query
   		data: {
-    		alert: "Confirmacion de servicio",
-    		date: request.params.date
-    		//homeServiceRequest: request.object.id
+    		alert: request.params.homeServiceName + " atenderá el servicio el " + request.params.date,
+    		date: request.params.date,
+        title: "Confirmación de servicio",
+        problemDescription: request.params.problemDescription
+    		//homeServiceRequest: request.params.requestId
   		}
 	}, {
   		success: function() {
@@ -37,26 +39,29 @@ Parse.Cloud.define("sendPushToClient", function(request, response) {
 
 
 Parse.Cloud.afterSave("HomeServiceRequest", function(request) {
-	var query = new Parse.Query(Parse.Installation);
-	console.log(request.object.get("homeService"));
-	query.equalTo('homeService', request.object.get("homeService"));
-	//console.log("requestID: " + request.object.id);
-	Parse.Push.send({
-  		where: query, // Set our Installation query
-  		data: {
-    		alert: "Willie Hayes injured by own pop fly.",
-    		homeServiceRequest: request.object.id
-  		}
-	}, {
-  		success: function() {
-    	// Push was successful
-    		console.log("Push was successful");
-  		},
-  		error: function(error) {
-    	// Handle error
-    	console.error("Push error: " + error.code + " : " + error.message);
-  		}
-	});
+
+  if(request.object.get("status") == 0){
+        var query = new Parse.Query(Parse.Installation);
+        //console.log(request.object.get("homeService"));
+        query.equalTo('homeService', request.object.get("homeService"));
+        //console.log("requestID: " + request.object.id);
+        Parse.Push.send({
+            where: query, // Set our Installation query
+            data: {
+              alert: "Nueva solicitud de servicio",
+              homeServiceRequest: request.object.id
+            }
+        }, {
+            success: function() {
+            // Push was successful
+              console.log("Push was successful");
+            },
+            error: function(error) {
+            // Handle error
+            console.error("Push error: " + error.code + " : " + error.message);
+            }
+        });
+        }
 
 });
 
