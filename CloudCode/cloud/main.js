@@ -221,17 +221,51 @@ Parse.Cloud.define("sendCancelServicePushToEmployee", function(request, response
   query.include("attendedBy");
   query.include("homeService.serviceProvider");
   query.get(request.params.requestId, {
-     if(post.get(attendedBy)){
-        console.log("attendedBy found!!");
-     } else {
-        console.log("we'll have to use the service provider");
-     }
+      success: function(post) {
+      var users = [];
+       console.log("POST: " + post.get('homeService').get('serviceProvider').id);
+      if(post.get('attendedBy').id){
+          console.log("attendedBy found!!");
+          users.push(post.get('attendedBy'));
+      }
+      if( post.get('homeService').get('serviceProvider').id) {
+          console.log("service provider  found");
+          users.push( post.get('homeService').get('serviceProvider'))
+      }
+
+      console.log("users: " + JSON.stringify(users));
+      var userQuery = new Parse.Query(Parse.Installation);
+      userQuery.containedIn('user',users);
+
+      //response.success("Push was successful");
+
+      Parse.Push.send({
+        where: userQuery, // Set our Installation query
+        data: {
+        alert: "El usuario ha cancelado el servicio"
+        //homeServiceRequest: request.params.requestId
+          //homeServiceRequest: request.params.requestId
+          }
+        },  {
+        success: function() {
+          // Push was successful
+            console.log("Push was successful");
+            response.success("Push was successful");
+        },
+          error: function(error) {
+          // Handle error
+          console.error("Push error: " + error.code + " : " + error.message);
+          response.error("Push error: " + error.code + " : " + error.message);
+        }
+      });
+  
         
-        //averageRatings(post.get("homeService"));
-        averageRatingsForPartner(post.get("attendedBy"));
+      //averageRatings(post.get("homeService"));
+      //averageRatingsForPartner(post.get("attendedBy"));
     },
     error: function(error) {
-         console.error("Got an error saving average" + error.code + " : " + error.message);
+         console.error("Got an error canceling service" + error.code + " : " + error.message);
+          response.error("Got an error canceling service: " + error.code + " : " + error.message);
     }
   });
 
@@ -242,25 +276,7 @@ Parse.Cloud.define("sendCancelServicePushToEmployee", function(request, response
   //query.equalTo('channels', 'Employee');
   
   //query.matchesQuery('user', userQuery);
-  Parse.Push.send({
-      where: userQuery, // Set our Installation query
-      data: {
-      alert: "El usuario ha cancelado el servicio",
-      homeServiceRequest: request.params.requestId
-        //homeServiceRequest: request.params.requestId
-      }
-  }, {
-      success: function() {
-      // Push was successful
-        console.log("Push was successful");
-        response.success("Push was successful");
-      },
-      error: function(error) {
-      // Handle error
-      console.error("Push error: " + error.code + " : " + error.message);
-      response.error("Push error: " + error.code + " : " + error.message);
-      }
-  });
+ 
 });
 
 
