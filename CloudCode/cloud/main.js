@@ -121,8 +121,8 @@ Parse.Cloud.afterSave("Review", function(request) {
 			post.set("rating",request.object.get("numStars"));
 		    post.save();
 		    console.log("REQUEST RATED");
-		    //averageRatings(post.get("homeService"));
-        averageRatingsForPartner(post.get("attendedBy"));
+		    averageRatings(post.get("homeService"));
+        //averageRatingsForPartner(post.get("attendedBy"));
 		},
 		error: function(error) {
 		     console.error("Got an error saving average" + error.code + " : " + error.message);
@@ -259,9 +259,6 @@ Parse.Cloud.define("sendCancelServicePushToEmployee", function(request, response
         }
       });
   
-        
-      //averageRatings(post.get("homeService"));
-      //averageRatingsForPartner(post.get("attendedBy"));
     },
     error: function(error) {
          console.error("Got an error canceling service" + error.code + " : " + error.message);
