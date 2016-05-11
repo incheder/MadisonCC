@@ -1,4 +1,4 @@
-
+require('cloud/jobs');
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
 /*Parse.Cloud.define("hello", function(request, response) {
@@ -265,14 +265,6 @@ Parse.Cloud.define("sendCancelServicePushToEmployee", function(request, response
           response.error("Got an error canceling service: " + error.code + " : " + error.message);
     }
   });
-
-  //var userQuery = new Parse.Query(Parse.User);
-  //userQuery.equalTo("objectId",request.params.employeeId ); 
-
-  //var query = new Parse.Query(Parse.Installation);
-  //query.equalTo('channels', 'Employee');
-  
-  //query.matchesQuery('user', userQuery);
  
 });
 

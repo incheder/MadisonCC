@@ -12,8 +12,10 @@ Parse.Cloud.job("ratingPush", function(request, status) {
   innerQuery.each(function(request) {
       
       var now = new Date();
+      var addedTime = new Date();
+      //console.log(request.get('dateForService'));
       var attendedTime = new Date(request.get('dateForService'));
-      var addedTime = addedTime.setHours(attendedTime.getHours() + 1);
+      addedTime = addedTime.setHours(attendedTime.getHours() + 1);
       if(now >= addedTime){
         users.push(request.get('attendedBy'));
       }
@@ -22,11 +24,13 @@ Parse.Cloud.job("ratingPush", function(request, status) {
       //if (counter % 100 === 0) {
         // Set the  job's progress status
       status.message(request.get('attendedBy')  + " user processed.");
+      console.log(request.get('attendedBy')  + " user processed.");
       //}
       //counter += 1;
       //return user.save();
   }).then(function() {
     // Set the job's success status
+    console.log('users size: ' +users.length);
     status.success("Migration completed successfully." + users);
   }, function(error) {
     // Set the job's error status
