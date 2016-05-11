@@ -18,13 +18,15 @@ Parse.Cloud.job("ratingPush", function(request, status) {
       addedTime = addedTime.setHours(attendedTime.getHours() + 1);
       if(now >= addedTime){
         users.push(request.get('attendedBy'));
+        status.message(request.get('attendedBy')  + " user processed.");
+        console.log(request.get('attendedBy')  + " user processed.");
+        console.log('users size: ' +users.length);
       }
       // Update to plan value passed in
       //user.set("plan", request.params.plan);
       //if (counter % 100 === 0) {
         // Set the  job's progress status
-      status.message(request.get('attendedBy')  + " user processed.");
-      console.log(request.get('attendedBy')  + " user processed.");
+      
       //}
       //counter += 1;
       //return user.save();
