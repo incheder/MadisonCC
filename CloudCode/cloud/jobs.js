@@ -3,39 +3,43 @@ Parse.Cloud.job("ratingPush", function(request, status) {
   var innerQuery = new Parse.Query("HomeServiceRequest");
   innerQuery.equalTo("status",1);
   innerQuery.exists('attendedBy');
-  
-  // Set up to modify user data
-  //Parse.Cloud.useMasterKey();
-  //var counter = 0;
-  // Query for all users
-  //var query = new Parse.Query(Parse.User);
+  innerQuery.include('user');
+  innerQuery.include('homeService')
   innerQuery.each(function(request) {
       
       var now = new Date();
-      var addedTime = new Date();
-      //console.log(request.get('dateForService'));
       var attendedTime = new Date(request.get('dateForService'));
+      var addedTime = attendedTime;
       addedTime = addedTime.setHours(attendedTime.getHours() + 1);
-      if(now >= addedTime){
-        users.push(request.get('attendedBy'));
-        status.message(request.get('attendedBy')  + " user processed.");
-        console.log(request.get('attendedBy')  + " user processed.");
-        console.log('users size: ' +users.length);
+      if(now.getTime() >= addedTime){
+        users.push(request.get('user'));
       }
-      // Update to plan value passed in
-      //user.set("plan", request.params.plan);
-      //if (counter % 100 === 0) {
-        // Set the  job's progress status
-      
-      //}
-      //counter += 1;
-      //return user.save();
-  }).then(function() {
-    // Set the job's success status
+
+  }).then( function() {
+
     console.log('users size: ' +users.length);
-    status.success("Migration completed successfully." + users);
-  }, function(error) {
+    var userQuery = new Parse.Query(Parse.Installation);
+    userQuery.containedIn('user',users);
+    Parse.Push.send({
+        where: userQuery, // Set our Installation query
+        data: {
+        alert: "Califica el servicio "
+        //homeServiceRequest: request.params.requestId
+        //homeServiceRequest: request.params.requestId
+        }
+    },{ success: function() {
+          // Push was successful
+            console.log("Push was successful");
+            status.success("Push enviado");
+      },error: function(error) {
+          // Handle error
+          console.error("Push error: " + error.code + " : " + error.message);
+          status.error("Uh oh, something went wrong." + error.code + " : " + error.message);
+        }
+      });
+    
+  },function(error) {
     // Set the job's error status
-    status.error("Uh oh, something went wrong.");
+    status.error("Uh oh, something went wrong." + error.code + " : " + error.message);
   });
 });
