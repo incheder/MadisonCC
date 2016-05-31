@@ -1,4 +1,5 @@
 require('cloud/jobs');
+require('cloud/cloudFunctions');
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 // For example:
 /*Parse.Cloud.define("hello", function(request, response) {
@@ -242,7 +243,7 @@ Parse.Cloud.define("sendCancelServicePushToEmployee", function(request, response
       Parse.Push.send({
         where: userQuery, // Set our Installation query
         data: {
-        alert: "El usuario ha cancelado el servicio"
+        alert: "El usuario ha cancelado el servicio " + post.get('homeService').get('name') 
         //homeServiceRequest: request.params.requestId
           //homeServiceRequest: request.params.requestId
           }
