@@ -10,8 +10,11 @@ Parse.Cloud.define("sendServiceCompletedPush", function(request, response) {
       where: query, // Set our Installation query
       data: {
         alert: "Servicio Completo",
-        homeServiceRequest: request.params.requestId
-        //homeServiceRequest: request.params.requestId
+        homeServiceRequest: request.params.requestId,
+        isComplete: true,
+        homeServiceName: request.params.homeServiceName,
+        attendedByAvatar: request.params.avatarUrl
+
       }
   }, {
       success: function() {

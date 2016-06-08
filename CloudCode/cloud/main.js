@@ -120,9 +120,22 @@ Parse.Cloud.afterSave("Review", function(request) {
 		success: function(post) {
 			post.set("wasRated",true);
 			post.set("rating",request.object.get("numStars"));
-		    post.save();
-		    console.log("REQUEST RATED");
-		    averageRatings(post.get("homeService"));
+		  //post.save();//TODO add callback
+      post.save(null, {
+        success: function(homeServiceRequest) {
+          // Execute any logic that should take place after the object is saved.
+          console.log('homeServiceRequest updated with ratings: ' + homeServiceRequest.id);
+          console.log("REQUEST RATED");
+          averageRatings(post.get("homeService"));
+        },
+        error: function(homeServiceRequest, error) {
+          // Execute any logic that should take place if the save fails.
+          // error is a Parse.Error with an error code and message.
+          console.log('Failed to update object, with error code: ' + error.message);
+        }
+      });
+
+		    
         //averageRatingsForPartner(post.get("attendedBy"));
 		},
 		error: function(error) {
@@ -132,7 +145,7 @@ Parse.Cloud.afterSave("Review", function(request) {
 
 
 function averageRatings(homeServiceID){
-
+  console.log("Average ratings, homeServiceID: " + homeServiceID);
   innerQuery = new Parse.Query("HomeServiceRequest");
   innerQuery.equalTo("homeService",homeServiceID);
   innerQuery.equalTo("wasRated",true)
@@ -158,7 +171,7 @@ function averageRatings(homeServiceID){
 		      post.set("stars",average);
 		      post.set("comments",results.length);
 		      post.save();
-		       console.log("STATS SAVED");
+		       console.log("STATS SAVED, comments length " + results.length);
 		    },
 		    error: function(error) {
 		      console.error("Got an error saving average" + error.code + " : " + error.message);
