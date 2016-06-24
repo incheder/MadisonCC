@@ -33,17 +33,18 @@ Parse.Cloud.define("sendServiceCompletedPush", function(request, response) {
 Parse.Cloud.define("sendCancelServicePushToUser", function(request, response) {
   var userQuery = new Parse.Query(Parse.User);
   userQuery.equalTo("objectId",request.params.userId ); 
-
-      //response.success("Push was successful");
+  var query = new Parse.Query(Parse.Installation);
+  query.equalTo('channels', 'Client');
+  query.matchesQuery('user', userQuery);
 
       Parse.Push.send({
-        where: userQuery, // Set our Installation query
+        where: query, // Set our Installation query
         data: {
-        alert: "El servicio ha sido cancelado " + post.get('homeService').get('name') 
-        //homeServiceRequest: request.params.requestId
-          //homeServiceRequest: request.params.requestId
-          }
-        },  {
+          alert: "El servicio ha sido cancelado", 
+          homeServiceRequest: request.params.requestId,
+          homeServiceName: request.params.homeServiceName
+        }
+      }, {
         success: function() {
           // Push was successful
             console.log("Push was successful");
@@ -56,12 +57,12 @@ Parse.Cloud.define("sendCancelServicePushToUser", function(request, response) {
         }
       });
   
-    },
+    /*},
     error: function(error) {
          console.error("Got an error canceling service" + error.code + " : " + error.message);
           response.error("Got an error canceling service: " + error.code + " : " + error.message);
     }
-  });
+  });*/
  
 });
  
