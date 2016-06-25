@@ -31,6 +31,11 @@ Parse.Cloud.define("sendServiceCompletedPush", function(request, response) {
 });
 
 Parse.Cloud.define("sendCancelServicePushToUser", function(request, response) {
+  var pushMessage = "El servicio ha sido cancelado";
+  if(request.params.isRefuse){
+      pushMessage = request.params.homeServiceName + " no podra atender tu solicitud de servicio";
+  }
+
   var userQuery = new Parse.Query(Parse.User);
   userQuery.equalTo("objectId",request.params.userId ); 
   var query = new Parse.Query(Parse.Installation);
@@ -40,7 +45,7 @@ Parse.Cloud.define("sendCancelServicePushToUser", function(request, response) {
       Parse.Push.send({
         where: query, // Set our Installation query
         data: {
-          alert: "El servicio ha sido cancelado", 
+          alert: pushMessage, 
           homeServiceRequest: request.params.requestId,
           homeServiceName: request.params.homeServiceName
         }
@@ -57,12 +62,5 @@ Parse.Cloud.define("sendCancelServicePushToUser", function(request, response) {
         }
       });
   
-    /*},
-    error: function(error) {
-         console.error("Got an error canceling service" + error.code + " : " + error.message);
-          response.error("Got an error canceling service: " + error.code + " : " + error.message);
-    }
-  });*/
- 
 });
- 
+
