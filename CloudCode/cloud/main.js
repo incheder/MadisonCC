@@ -9,7 +9,7 @@ require('cloud/cloudFunctions');
 //actuakizar el estado del request una vez respondido
 Parse.Cloud.define("sendPushToEmployee", function(request, response) {
   var userQuery = new Parse.Query(Parse.User);
-  userQuery.equalTo("objectId",request.params.employeeId ); 
+  userQuery.equalTo("objectId",request.params.employeeId );
 
   var query = new Parse.Query(Parse.Installation);
   query.equalTo('channels', 'Employee');
@@ -39,7 +39,7 @@ Parse.Cloud.define("sendPushToEmployee", function(request, response) {
 
 Parse.Cloud.define("sendPushToClient", function(request, response) {
   var userQuery = new Parse.Query(Parse.User);
-  userQuery.equalTo("objectId",request.params.client ); 
+  userQuery.equalTo("objectId",request.params.client );
 
   var query = new Parse.Query(Parse.Installation);
   query.equalTo('channels', 'Client');
@@ -78,7 +78,7 @@ Parse.Cloud.afterSave("HomeServiceRequest", function(request) {
   if(request.object.get("status") == 0){
         console.log("provider "+ request.object.get("serviceProvider"));
         var providerQuery = new Parse.Query(Parse.User);
-        providerQuery.equalTo("objectId",request.object.get("serviceProvider") ); 
+        providerQuery.equalTo("objectId",request.object.get("serviceProvider") );
 
 
         var query = new Parse.Query(Parse.Installation);
@@ -91,7 +91,7 @@ Parse.Cloud.afterSave("HomeServiceRequest", function(request) {
 
         query.matchesQuery("user",providerQuery);
         //console.log("requestID: " + request.object.id);
-        
+
         Parse.Push.send({
             where: query, // Set our Installation query
             data: {
@@ -120,6 +120,7 @@ Parse.Cloud.afterSave("Review", function(request) {
 		success: function(post) {
 			post.set("wasRated",true);
 			post.set("rating",request.object.get("numStars"));
+      post.set('review',request.object);
 		  //post.save();//TODO add callback
       post.save(null, {
         success: function(homeServiceRequest) {
@@ -135,7 +136,7 @@ Parse.Cloud.afterSave("Review", function(request) {
         }
       });
 
-		    
+
         //averageRatingsForPartner(post.get("attendedBy"));
 		},
 		error: function(error) {
@@ -160,11 +161,11 @@ function averageRatings(homeServiceID){
 	      	var object = results[i];
 	      	average = average + object.get("numStars");
 
-	      	
+
 	    }
 	    //console.log(results);
 	    average = average / results.length;
-	   
+
 		query = new Parse.Query("HomeServices");
 		  query.get(homeServiceID.id, {
 		    success: function(post) {
@@ -184,12 +185,12 @@ function averageRatings(homeServiceID){
     }
   });
 
-}	
+}
 
 function averageRatingsForPartner(attendedBy){
 
  //var userQuery = new Parse.Query(Parse.User);
-  //userQuery.equalTo("objectId",attendedBy); 
+  //userQuery.equalTo("objectId",attendedBy);
 
   query = new Parse.Query("Review");
   query.equalTo("attendedBy",attendedBy);
@@ -201,13 +202,13 @@ function averageRatingsForPartner(attendedBy){
           var object = results[i];
           average = average + object.get("numStars");
 
-          
+
       }
       //console.log(results);
       average = average / results.length;
-     
+
     var userQuery = new Parse.Query(Parse.User);
-    //userQuery.equalTo("objectId",attendedBy); 
+    //userQuery.equalTo("objectId",attendedBy);
       query.get(attendedBy, {
         success: function(post) {
           post.set("stars",average);
@@ -226,8 +227,8 @@ function averageRatingsForPartner(attendedBy){
     }
   });
 
-} 
-  
+}
+
 });
 
 Parse.Cloud.define("sendCancelServicePushToEmployee", function(request, response) {
@@ -237,12 +238,12 @@ Parse.Cloud.define("sendCancelServicePushToEmployee", function(request, response
   query.get(request.params.requestId, {
       success: function(post) {
       var users = [];
-       console.log("POST: " + post.get('homeService').get('serviceProvider').id);
-      if(post.get('attendedBy').id){
+       //console.log("POST: " + post.get('homeService').get('serviceProvider').id);
+      if(post.get('attendedBy')){
           console.log("attendedBy found!!");
           users.push(post.get('attendedBy'));
       }
-      if( post.get('homeService').get('serviceProvider').id) {
+      if( post.get('homeService').get('serviceProvider')) {
           console.log("service provider  found");
           users.push( post.get('homeService').get('serviceProvider'))
       }
@@ -256,8 +257,8 @@ Parse.Cloud.define("sendCancelServicePushToEmployee", function(request, response
       Parse.Push.send({
         where: userQuery, // Set our Installation query
         data: {
-        alert: "El usuario ha cancelado el servicio " + post.get('homeService').get('name') 
-        //homeServiceRequest: request.params.requestId
+        alert: "El usuario ha cancelado el servicio " + post.get('homeService').get('name'),
+        homeServiceRequest: request.params.requestId
           //homeServiceRequest: request.params.requestId
           }
         },  {
@@ -272,14 +273,12 @@ Parse.Cloud.define("sendCancelServicePushToEmployee", function(request, response
           response.error("Push error: " + error.code + " : " + error.message);
         }
       });
-  
+
     },
     error: function(error) {
          console.error("Got an error canceling service" + error.code + " : " + error.message);
           response.error("Got an error canceling service: " + error.code + " : " + error.message);
     }
   });
- 
+
 });
-
-

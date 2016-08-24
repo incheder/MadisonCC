@@ -23,7 +23,7 @@ Parse.Cloud.job("ratingPush", function(request, status) {
     Parse.Push.send({
         where: userQuery, // Set our Installation query
         data: {
-        alert: "Califica el servicio "
+        alert: "Califica el servicio"
         //homeServiceRequest: request.params.requestId
         //homeServiceRequest: request.params.requestId
         }
